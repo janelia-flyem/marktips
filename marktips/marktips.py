@@ -53,7 +53,6 @@ from .version import version
 appname = "marktips.py"
 
 todocomment = "placed by marktips.py v" + version
-# todocomment = "placed by marktips.py v"
 
 
 # ------------------------- code -------------------------
