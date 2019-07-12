@@ -1,0 +1,28 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: marktips
+  
+  version: {{ data['version'] }}
+
+source:
+  path: ..
+
+build:
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python
+    - setuptools
+  run:
+    - python
+    # dependencies are defined in setup.py
+    {% for dep in data['install_requires'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
+
+about:
+  home: https://github.com/janelia-flyem/marktips
+  summary: Find neuron tips and place to do items in DVID
