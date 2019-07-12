@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
-from marktips.version import version
-
+import versioneer
+ 
 requirements = [
     'requests',
     'dvidtools'
@@ -9,7 +9,8 @@ requirements = [
 
 setup(
     name='marktips',
-    version=version,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description="mark skeleton tips for review",
     author="Donald J. Olbris",
     author_email='olbrisd@janelia.hhmi.org',

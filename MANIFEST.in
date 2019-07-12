@@ -1,0 +1,2 @@
+include versioneer.py
+include marktips/_version.py
