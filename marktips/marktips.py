@@ -27,13 +27,13 @@ except ImportError:
     hasDVIDtools = False
 
 # local
-from .version import version
+from . import __version__
 
 
 # ------------------------- constants -------------------------
 appname = "marktips.py"
 
-todocomment = "placed by marktips.py v" + version
+todocomment = "placed by marktips.py v" + __version__
 
 
 # ------------------------- code -------------------------
