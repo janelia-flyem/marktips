@@ -45,9 +45,14 @@ try:
 except ImportError:
     hasDVIDtools = False
 
+# local
+from version import version
+
 
 # ------------------------- constants -------------------------
 appname = "marktips.py"
+
+todocomment = "placed by marktips.py v" + version
 
 
 # ------------------------- code -------------------------
@@ -141,7 +146,7 @@ class TipDetector:
             "Prop": {},
         }
         ann["Pos"] = list(location)
-        ann["Prop"]["comment"] = "placed by detect_tips.py"
+        ann["Prop"]["comment"] = todocomment
         ann["Prop"]["user"] = self.username
         ann["Prop"]["checked"] = "0"
         return ann
