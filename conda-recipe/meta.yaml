@@ -23,6 +23,13 @@ requirements:
     - {{ dep.lower() }}
     {% endfor %}
 
+test:
+  imports:
+    - marktips
+
+commands:
+    - test -f $PREFIX/bin/marktips  # [unix]
+
 about:
   home: https://github.com/janelia-flyem/marktips
   summary: Find neuron tips and place to do items in DVID
