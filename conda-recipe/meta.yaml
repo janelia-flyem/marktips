@@ -33,3 +33,5 @@ commands:
 about:
   home: https://github.com/janelia-flyem/marktips
   summary: Find neuron tips and place to do items in DVID
+  license: GPL-3.0
+  license_file: LICENSE
