@@ -2,26 +2,7 @@
 
 marktips.py
 
-
-this script finds tips of bodies that should be reviewed; the bodies
-must have skeletons available in DVID; the script places to do items 
-on the tip locations, then reports back its status via std out in json form
-
-output = {
-    "status": true | false (success or failure),
-    "message": "error or success message",
-    }
-
-there is other optional data that is returned in the output json
-on success, eg, the locations themselves and the elapsed time
-
-
-usage: marktips.py serverport uuid bodyid todoinstance
-
-
-requires:
-- dvid_tools library (and its dependencies)
-- requests
+see README.md for usage
 
 
 """
