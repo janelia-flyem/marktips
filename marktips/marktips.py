@@ -35,6 +35,8 @@ appname = "marktips.py"
 
 todocomment = "placed by marktips.py v" + __version__
 
+todoinstancename = "segmentation_todo"
+
 
 # ------------------------- code -------------------------
 def postdvid(call, username, data):
@@ -52,10 +54,26 @@ def postdvid(call, username, data):
 
     return requests.post(call, data=json.dumps(data))
 
+def getdvid(call, username):
+    """
+    does a GET call to DVID
+
+    input: URL to call; username
+    output: requests response object
+    """
+    # add user and app tags
+    if "?" not in call:
+        call += "?"
+    else:
+        call += "&"
+    call += "u={}&app={}".format(username, appname)
+
+    return requests.get(call)
 
 def errorquit(message):
     result = {
         "status": False,
+        "version": __version__,
         "message": message,
     }
     print(json.dumps(result))
@@ -99,6 +117,23 @@ class TipDetector:
         t2 = time.time()
         self.tfind = t2 - t1
 
+    def gettodos(self):
+        """
+        retrieve to do items on the body of interest
+        """
+        todocall = self.serverport + "/api/node/" + self.uuid + "/" + todoinstancename + "/label/" + self.bodyid
+        r = getdvid(todocall, self.username)
+        if r.status_code != requests.codes.ok:
+            # bail out; later I'd prefer to have the error percolate up and be
+            #   handled by the calling routine, but for now, just quit:
+            message = "existing to do retrieval failed!\n"
+            message += f"url: {todocall}\n"
+            message += f"status code: {r.status_code}\n"
+            message += f"returned text: {r.text}\n"
+            errorquit(message)
+        else:
+            return r.json()
+
     def placetodos(self):
         """
         posts a to do item at each previously found tip location
@@ -110,8 +145,11 @@ class TipDetector:
             return
 
         t1 = time.time()
-        annlist = [self.maketodo(loc) for loc in self.locations]
 
+        # retrieve existing to do items on the body and remove those locations
+        #   so we don't overwrite them
+        existinglocations = set(tuple(td["Pos"]) for td in self.gettodos())
+        annlist = [self.maketodo(loc) for loc in self.locations if tuple(loc) not in existinglocations]
         self.postannotations(annlist)
 
         t2 = time.time()
@@ -158,10 +196,12 @@ class TipDetector:
         result = {
             "status": True,
             "message": message,
+            "version": __version__,
             "tfind": self.tfind,
             "tplace": self.tplace,
             "ttotal": self.tfind + self.tplace,
             "nlocations": len(self.locations),
+            "nplaced": self.ntodosplaced,
             "locations": self.locations,
         }
         print(json.dumps(result))

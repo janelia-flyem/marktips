@@ -19,6 +19,7 @@ When the script runs, you will see a text-based progress bar showing its progres
     {
     "status": true or false (success or failure)
     "message": error or success message
+    "version": version of marktips 
 
     # when successful, more data will be provided:
     "tfind": time in seconds taken to find tips
@@ -27,6 +28,7 @@ When the script runs, you will see a text-based progress bar showing its progres
 
     "locations": list of [x, y, z] locations of the tips
     "nlocations": number of locations
+    "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations already had to do items, which were not replaced
     }
 ```
 
