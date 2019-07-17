@@ -45,13 +45,7 @@ def postdvid(call, username, data):
 
     input: the URL to call; username; the data to be posted
     """
-    # add user and app tags
-    if "?" not in call:
-        call += "?"
-    else:
-        call += "&"
-    call += "u={}&app={}".format(username, appname)
-
+    call = addappuser(call, username, appname)
     return requests.post(call, data=json.dumps(data))
 
 def getdvid(call, username):
@@ -61,14 +55,23 @@ def getdvid(call, username):
     input: URL to call; username
     output: requests response object
     """
-    # add user and app tags
+    call = addappuser(call, username, appname)
+    return requests.get(call)
+
+def addappuser(call, username, appname):
+    """
+    add the user and app name to a call
+    """
+    if "u=" in call:
+        # already has user; assume it has app, too
+        return call
+
     if "?" not in call:
         call += "?"
     else:
         call += "&"
     call += "u={}&app={}".format(username, appname)
-
-    return requests.get(call)
+    return call
 
 def errorquit(message):
     result = {
