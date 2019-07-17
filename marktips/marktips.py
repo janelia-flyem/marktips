@@ -111,7 +111,17 @@ class TipDetector:
         #   trap and ignore it
         output = StringIO()
         with redirect_stdout(output):
-            tips = dt.detect_tips(self.bodyid)
+            noskeleton = False
+            try:
+                tips = dt.detect_tips(self.bodyid)
+            except ValueError as e:
+                if "appears to not have a skeleton" in e.__str__():
+                    noskeleton = True
+                else:
+                    raise e
+        if noskeleton:
+            errorquit("body " + self.bodyid + " does not appear to have a skeleton!")
+
         self.locations = tips.loc[:, ["x", "y", "z"]].values.tolist()
 
         t2 = time.time()
