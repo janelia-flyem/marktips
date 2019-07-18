@@ -9,6 +9,7 @@ see README.md for usage
 
 # ------------------------- imports -------------------------
 # std lib
+import argparse
 from contextlib import redirect_stdout
 import getpass
 from io import StringIO
@@ -225,17 +226,25 @@ def main():
     if not hasDVIDtools:
         errorquit("could not import dvid_tools library")
 
-    if len(sys.argv) < 5:
-        errorquit("missing arguments; received: " + ", ".join(sys.argv))
+    parser = argparse.ArgumentParser(description="find and mark tips on neurons")
 
-    serverport = sys.argv[1]
-    if not serverport.startswith("http://"):
-        serverport = "http://" + serverport
-    uuid = sys.argv[2]
-    bodyid = sys.argv[3]
-    todoinstance = sys.argv[4]
+    # required positional arguments
+    parser.add_argument("serverport", help="server and port of DVID server")
+    parser.add_argument("uuid", help="UUID of the DVID node")
+    parser.add_argument("bodyid", help="body ID of the body to find tips on")
+    parser.add_argument("todoinstance", help="DVID instance name where to do items are stored")
 
-    detector = TipDetector(serverport, uuid, bodyid, todoinstance)
+    parser.add_argument("--version", action="version", version=__version__)
+    parser.add_argument("--find-only", action="store_true", help="find tips only; do not place to do items")
+
+    parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
+
+
+    args = parser.parse_args()
+    if not args.serverport.startswith("http://"):
+        args.serverport = "http://" + args.serverport
+
+    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance)
     detector.findandplace()
 
 
