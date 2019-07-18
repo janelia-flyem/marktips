@@ -85,21 +85,27 @@ def errorquit(message):
 
 
 class TipDetector:
-    def __init__(self, serverport, uuid, bodyid, todoinstance):
+    def __init__(self, serverport, uuid, bodyid, todoinstance, roi=None):
         self.serverport = serverport
         self.uuid = uuid
         self.bodyid = bodyid
         self.todoinstance = todoinstance
+        self.roi = roi
         self.username = getpass.getuser()
+
         self.locations = []
         self.ntodosplaced = 0
+        self.ntodosplaced = 0
+        self.tplace = 0.0
+        self.tfind = 0.0
 
-    def findandplace(self):
+    def findandplace(self, findonly):
         """
         find tips and place to do items; report results by printing json; quit
         """
         self.findtips()
-        self.placetodos()
+        if not findonly:
+            self.placetodos()
         self.reportquit()
 
     def findtips(self):
@@ -154,8 +160,6 @@ class TipDetector:
         """
 
         if len(self.locations) == 0:
-            self.ntodosplaced = 0
-            self.tplace = 0.0
             return
 
         t1 = time.time()
@@ -244,8 +248,8 @@ def main():
     if not args.serverport.startswith("http://"):
         args.serverport = "http://" + args.serverport
 
-    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance)
-    detector.findandplace()
+    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.roi)
+    detector.findandplace(args.find_only)
 
 
 # ------------------------- script starts here -------------------------
