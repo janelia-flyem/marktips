@@ -13,6 +13,12 @@ uuid = UUID of data
 bodyid = ID of the body to find tips for
 todoinstance = name of data instance in DVID that will hold the to do items
 
+optional flags:
+
+--version prints the version and quits
+--find-only finds and returns the tip locations but does not place the to do items
+--roi (RoI name) discards any found tips that are not in the input DVID RoI
+
 When the script runs, you will see a text-based progress bar showing its progress (courtesy of dvid_tools). After it's done, it will print a json object to the screen with the following data:
 
 ```
@@ -26,8 +32,9 @@ When the script runs, you will see a text-based progress bar showing its progres
     "tplace": time in seconds to place to do items
     "ttotal": tfind + tplace
 
-    "locations": list of [x, y, z] locations of the tips
-    "nlocations": number of locations
+    "locations": list of [x, y, z] locations of the tips in the RoI
+    "nlocations": number of tips found
+    "nlocationsRoI": number of tips found in the input RoI
     "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations already had to do items, which were not replaced
     }
 ```

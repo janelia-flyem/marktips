@@ -94,7 +94,8 @@ class TipDetector:
         self.username = getpass.getuser()
 
         self.locations = []
-        self.ntodosplaced = 0
+        self.nlocations = 0
+        self.nlocationsroi = 0
         self.ntodosplaced = 0
         self.tplace = 0.0
         self.tfind = 0.0
@@ -133,6 +134,13 @@ class TipDetector:
             errorquit("body " + self.bodyid + " does not appear to have a skeleton!")
 
         self.locations = tips.loc[:, ["x", "y", "z"]].values.tolist()
+        self.nlocations = len(self.locations)
+
+        # filter by RoI if applicable
+        if self.roi is not None:
+            insidelist = self.insideRoI(self.locations)
+            self.locations = [item for item, test in zip(self.locations, insidelist) if test]
+        self.nlocationsroi = len(self.locations)
 
         t2 = time.time()
         self.tfind = t2 - t1
@@ -154,6 +162,15 @@ class TipDetector:
         else:
             return r.json()
 
+    def insideRoI(self, pointlist):
+        """
+        input: list of [x, y, z] points
+        output: list of [True, False, ...] indicating if each point is in self.roi
+        """
+        call = self.serverport + "/api/node/" + self.uuid + "/" + self.roi + "/ptquery"
+        r = postdvid(call, self.username, data=pointlist)
+        return r.json()
+
     def placetodos(self):
         """
         posts a to do item at each previously found tip location
@@ -168,6 +185,7 @@ class TipDetector:
         #   so we don't overwrite them
         existinglocations = set(tuple(td["Pos"]) for td in self.gettodos())
         annlist = [self.maketodo(loc) for loc in self.locations if tuple(loc) not in existinglocations]
+
         self.postannotations(annlist)
 
         t2 = time.time()
@@ -218,7 +236,8 @@ class TipDetector:
             "tfind": self.tfind,
             "tplace": self.tplace,
             "ttotal": self.tfind + self.tplace,
-            "nlocations": len(self.locations),
+            "nlocations": self.nlocations,
+            "nlocationsRoI": self.nlocationsroi,
             "nplaced": self.ntodosplaced,
             "locations": self.locations,
         }
