@@ -10,7 +10,7 @@ see README.md for usage
 # ------------------------- imports -------------------------
 # std lib
 import argparse
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 import getpass
 from io import StringIO
 import json
@@ -118,18 +118,20 @@ class TipDetector:
 
         dt.set_param(self.serverport, self.uuid, self.username)
 
-        # this routine spews output to stdout, which I want to control; so
+        # this routine spews output to stdout and stderr, which I want to control; so
         #   trap and ignore it
         output = StringIO()
-        with redirect_stdout(output):
-            noskeleton = False
-            try:
-                tips = dt.detect_tips(self.bodyid)
-            except ValueError as e:
-                if "appears to not have a skeleton" in e.__str__():
-                    noskeleton = True
-                else:
-                    raise e
+        errorOutput = StringIO()
+        with redirect_stderr(errorOutput):
+            with redirect_stdout(output):
+                noskeleton = False
+                try:
+                    tips = dt.detect_tips(self.bodyid)
+                except ValueError as e:
+                    if "appears to not have a skeleton" in e.__str__():
+                        noskeleton = True
+                    else:
+                        raise e
         if noskeleton:
             errorquit("body " + self.bodyid + " does not appear to have a skeleton!")
 

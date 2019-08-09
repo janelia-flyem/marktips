@@ -6,7 +6,9 @@ In general, the script is designed to be used from within NeuTu (support to be r
 
 usage:
 
+```
 python marktips.py serverport uuid bodyid todoinstance
+
 
 serverport = server and port of DVID instanc
 uuid = UUID of data
@@ -18,6 +20,7 @@ optional flags:
 --version prints the version and quits
 --find-only finds and returns the tip locations but does not place the to do items
 --roi (RoI name) discards any found tips that are not in the input DVID RoI
+```
 
 When the script runs, you will see a text-based progress bar showing its progress (courtesy of dvid_tools). After it's done, it will print a json object to the screen with the following data:
 
