@@ -20,6 +20,7 @@ optional flags:
 --version prints the version and quits
 --find-only finds and returns the tip locations but does not place the to do items
 --roi (RoI name) discards any found tips that are not in the input DVID RoI
+--username (username) assigns the to do items to the input username rather than the user running the script
 ```
 
 When the script runs, you will see a text-based progress bar showing its progress (courtesy of dvid_tools). After it's done, it will print a json object to the screen with the following data:

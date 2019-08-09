@@ -85,13 +85,16 @@ def errorquit(message):
 
 
 class TipDetector:
-    def __init__(self, serverport, uuid, bodyid, todoinstance, roi=None):
+    def __init__(self, serverport, uuid, bodyid, todoinstance, username=None, roi=None):
         self.serverport = serverport
         self.uuid = uuid
         self.bodyid = bodyid
         self.todoinstance = todoinstance
         self.roi = roi
-        self.username = getpass.getuser()
+        if username is None:
+            self.username = getpass.getuser()
+        else:
+            self.username = username
 
         self.locations = []
         self.nlocations = 0
@@ -263,13 +266,14 @@ def main():
     parser.add_argument("--find-only", action="store_true", help="find tips only; do not place to do items")
 
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
+    parser.add_argument("--username", help="specify a username to assign the to do items to")
 
 
     args = parser.parse_args()
     if not args.serverport.startswith("http://"):
         args.serverport = "http://" + args.serverport
 
-    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.roi)
+    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username, args.roi)
     detector.findandplace(args.find_only)
 
 
