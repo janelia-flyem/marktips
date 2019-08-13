@@ -39,7 +39,8 @@ When the script is finished running, it will print a json object to the screen w
     "locations": list of [x, y, z] locations of the tips in the RoI
     "nlocations": number of tips found
     "nlocationsRoI": number of tips found in the input RoI
-    "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations already had to do items, which were not replaced, or some locations were outside the given RoI
+    "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations 
+        already had to do items, which were not replaced, or some locations were outside the given RoI
     }
 ```
 
