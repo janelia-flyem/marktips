@@ -70,3 +70,6 @@ junit.xml
 
 # sublime
 *.sublime-workspace
+
+# PyCharm
+.idea/
