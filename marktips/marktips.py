@@ -117,6 +117,9 @@ class TipDetector:
         else:
             self.username = username
 
+        # hold description of what was run
+        self.parameters = {}
+
         self.locations = []
         self.nlocations = 0
         self.nlocationsroi = 0
@@ -154,6 +157,7 @@ class TipDetector:
             with redirect_stdout(StringIO()):
                 noskeleton = False
                 try:
+                    self.parameters["body ID"] = self.bodyid
                     tips = dt.detect_tips(self.bodyid)
                 except ValueError as e:
                     if "appears to not have a skeleton" in e.__str__():
@@ -168,6 +172,7 @@ class TipDetector:
 
         # filter by RoI if applicable
         if self.roi is not None:
+            self.parameters["RoI"] = self.roi
             insidelist = self.insideRoI(self.locations)
             self.locations = [item for item, test in zip(self.locations, insidelist) if test]
         self.nlocationsroi = len(self.locations)
@@ -262,6 +267,7 @@ class TipDetector:
         result = {
             "status": True,
             "message": message,
+            "parameters": self.parameters,
             "tfind": self.tfind,
             "tplace": self.tplace,
             "ttotal": self.tfind + self.tplace,
@@ -293,7 +299,6 @@ def main():
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
     parser.add_argument("--show-progress", action="store_true", help="show a progress bar while running")
     parser.add_argument("--username", help="specify a username to assign the to do items to")
-
 
     args = parser.parse_args()
     if not args.serverport.startswith("http://"):

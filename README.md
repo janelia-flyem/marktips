@@ -35,6 +35,10 @@ When the script is finished running, it will print a json object to the screen w
     "time": time stamp when output is written, in format '2019-09-09 10:38:32'
 
     # when successful, more data will be provided:
+    "parameters": dictionary with run parameters; may include:
+        "body ID": the ID of the body
+        "RoI": the RoI where the to do items were placed
+
     "tfind": time in seconds taken to find tips
     "tplace": time in seconds to place to do items
     "ttotal": tfind + tplace
