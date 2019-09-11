@@ -49,6 +49,7 @@ def noredirect():
     # dummy context manager
     yield None
 
+
 def postdvid(call, username, data):
     """
     POSTs the input data to DVID
@@ -57,6 +58,7 @@ def postdvid(call, username, data):
     """
     call = addappuser(call, username, appname)
     return requests.post(call, data=json.dumps(data))
+
 
 def getdvid(call, username):
     """
@@ -67,6 +69,7 @@ def getdvid(call, username):
     """
     call = addappuser(call, username, appname)
     return requests.get(call)
+
 
 def addappuser(call, username, appname):
     """
@@ -83,14 +86,21 @@ def addappuser(call, username, appname):
     call += "u={}&app={}".format(username, appname)
     return call
 
+
+def getdefaultoutput():
+    return {
+        "version": __version__,
+        "username": getpass.getuser(),
+        "time": time.strftime(timeformat)
+    }
+
+
 def errorquit(message):
     result = {
         "status": False,
-        "version": __version__,
-        "username": getpass.getuser(),
-        "time": time.strftime(timeformat),
         "message": message,
     }
+    result.update(getdefaultoutput())
     print(json.dumps(result))
     sys.exit(1)
 
@@ -252,9 +262,6 @@ class TipDetector:
         result = {
             "status": True,
             "message": message,
-            "version": __version__,
-            "username": self.username,
-            "time": time.strftime(timeformat),
             "tfind": self.tfind,
             "tplace": self.tplace,
             "ttotal": self.tfind + self.tplace,
@@ -263,6 +270,7 @@ class TipDetector:
             "nplaced": self.ntodosplaced,
             "locations": self.locations,
         }
+        result.update(getdefaultoutput())
         print(json.dumps(result))
         sys.exit(0)
 
