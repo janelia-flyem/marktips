@@ -47,3 +47,7 @@ When the script is finished running, it will print a json object to the screen w
 # requirements
 
 This script requires the "requests" library and the "dvid_tools" library.
+
+# version history
+
+The version history for marktips.py can be found [on the wiki](https://github.com/janelia-flyem/marktips/wiki/Version-history).
