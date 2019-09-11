@@ -56,7 +56,7 @@ def postdvid(call, username, data):
 
     input: the URL to call; username; the data to be posted
     """
-    call = addappuser(call, username, appname)
+    call = addappuser(call, username)
     return requests.post(call, data=json.dumps(data))
 
 
@@ -67,11 +67,11 @@ def getdvid(call, username):
     input: URL to call; username
     output: requests response object
     """
-    call = addappuser(call, username, appname)
+    call = addappuser(call, username)
     return requests.get(call)
 
 
-def addappuser(call, username, appname):
+def addappuser(call, username):
     """
     add the user and app name to a call
     """
@@ -239,6 +239,8 @@ class TipDetector:
         ann["Prop"]["comment"] = todocomment
         ann["Prop"]["user"] = self.username
         ann["Prop"]["checked"] = "0"
+        ann["Prop"]["action"] = "tip detector"
+        ann["Tags"] = ["action:tip_detector"]
         return ann
 
     def postannotations(self, annlist):
