@@ -31,6 +31,8 @@ When the script is finished running, it will print a json object to the screen w
     "status": true or false (success or failure)
     "message": error or success message
     "version": version of marktips 
+    "username": username running the script
+    "time": time stamp when output is written, in format '2019-09-09 10:38:32'
 
     # when successful, more data will be provided:
     "tfind": time in seconds taken to find tips

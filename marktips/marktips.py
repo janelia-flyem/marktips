@@ -38,6 +38,9 @@ todocomment = "placed by marktips.py v" + __version__
 
 todoinstancename = "segmentation_todo"
 
+# format = '2019-09-11 10:38:32'
+timeformat = "%Y-%m-%d %H:%M:%S"
+
 
 # ------------------------- code -------------------------
 
@@ -84,6 +87,8 @@ def errorquit(message):
     result = {
         "status": False,
         "version": __version__,
+        "username": getpass.getuser(),
+        "time": time.strftime(timeformat),
         "message": message,
     }
     print(json.dumps(result))
@@ -248,6 +253,8 @@ class TipDetector:
             "status": True,
             "message": message,
             "version": __version__,
+            "username": self.username,
+            "time": time.strftime(timeformat),
             "tfind": self.tfind,
             "tplace": self.tplace,
             "ttotal": self.tfind + self.tplace,
