@@ -10,7 +10,7 @@ see README.md for usage
 # ------------------------- imports -------------------------
 # std lib
 import argparse
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
 import getpass
 from io import StringIO
 import json
@@ -40,6 +40,12 @@ todoinstancename = "segmentation_todo"
 
 
 # ------------------------- code -------------------------
+
+@contextmanager
+def noredirect():
+    # dummy context manager
+    yield None
+
 def postdvid(call, username, data):
     """
     POSTs the input data to DVID
@@ -103,16 +109,16 @@ class TipDetector:
         self.tplace = 0.0
         self.tfind = 0.0
 
-    def findandplace(self, findonly):
+    def findandplace(self, args):
         """
         find tips and place to do items; report results by printing json; quit
         """
-        self.findtips()
-        if not findonly:
+        self.findtips(args.show_progress)
+        if not args.find_only:
             self.placetodos()
         self.reportquit()
 
-    def findtips(self):
+    def findtips(self, showprogress):
         """
         finds and stores tip locations for input body id
         """
@@ -121,12 +127,16 @@ class TipDetector:
 
         dt.set_param(self.serverport, self.uuid, self.username)
 
-        # this routine spews output to stdout and stderr, which I want to control; so
-        #   trap and ignore it
-        output = StringIO()
-        errorOutput = StringIO()
-        with redirect_stderr(errorOutput):
-            with redirect_stdout(output):
+        # dt.detect_tips() sends output to stdout and stderr, which I want to control when
+        #   I run from within NeuTu; however, the progress bar (which goes to stderr) is
+        #   useful when run outside NeuTu; so trap and ignore stdout all the time, but
+        #   if the user wants it, don't trap stderr so the progress bar is visible
+        if showprogress:
+            stderrRedirect = noredirect()
+        else:
+            stderrRedirect = redirect_stderr(StringIO())
+        with stderrRedirect:
+            with redirect_stdout(StringIO()):
                 noskeleton = False
                 try:
                     tips = dt.detect_tips(self.bodyid)
@@ -266,6 +276,7 @@ def main():
     parser.add_argument("--find-only", action="store_true", help="find tips only; do not place to do items")
 
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
+    parser.add_argument("--show-progress", action="store_true", help="show a progress bar while running")
     parser.add_argument("--username", help="specify a username to assign the to do items to")
 
 
@@ -274,7 +285,7 @@ def main():
         args.serverport = "http://" + args.serverport
 
     detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username, args.roi)
-    detector.findandplace(args.find_only)
+    detector.findandplace(args)
 
 
 # ------------------------- script starts here -------------------------
