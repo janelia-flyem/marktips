@@ -106,12 +106,14 @@ def errorquit(message):
 
 
 class TipDetector:
-    def __init__(self, serverport, uuid, bodyid, todoinstance, username=None, roi=None):
+    def __init__(self, serverport, uuid, bodyid, todoinstance, username=None,
+        roi=None, excluded_roi=None):
         self.serverport = serverport
         self.uuid = uuid
         self.bodyid = bodyid
         self.todoinstance = todoinstance
         self.roi = roi
+        self.excluded_roi = excluded_roi
         if username is None:
             self.username = getpass.getuser()
         else:
@@ -127,12 +129,15 @@ class TipDetector:
         self.tplace = 0.0
         self.tfind = 0.0
 
-    def findandplace(self, args):
+    def findandplace(self, find_only, show_progress):
         """
         find tips and place to do items; report results by printing json; quit
+
+        input: flag for finding tips but not placing to do; flag for
+            showing progress bar on command line (in stderr)
         """
-        self.findtips(args.show_progress)
-        if not args.find_only:
+        self.findtips(show_progress)
+        if not find_only:
             self.placetodos()
         self.reportquit()
 
@@ -171,10 +176,18 @@ class TipDetector:
         self.nlocations = len(self.locations)
 
         # filter by RoI if applicable
+        # must be inside this roi, if given:
         if self.roi is not None:
             self.parameters["RoI"] = self.roi
-            insidelist = self.insideRoI(self.locations)
-            self.locations = [item for item, test in zip(self.locations, insidelist) if test]
+            insidelist = self.insideRoI(self.locations, self.roi)
+            self.locations = [item for item, inside in zip(self.locations, insidelist) if inside]
+
+        # must not be in this roi, if given:
+        if self.excluded_roi is not None:
+            self.parameters["excluded RoI"] = self.excluded_roi
+            insidelist = self.insideRoI(self.locations, self.excluded_roi)
+            self.locations = [item for item, inside in zip(self.locations, insidelist) if not inside]
+
         self.nlocationsroi = len(self.locations)
 
         t2 = time.time()
@@ -197,12 +210,12 @@ class TipDetector:
         else:
             return r.json()
 
-    def insideRoI(self, pointlist):
+    def insideRoI(self, pointlist, roi):
         """
         input: list of [x, y, z] points
         output: list of [True, False, ...] indicating if each point is in self.roi
         """
-        call = self.serverport + "/api/node/" + self.uuid + "/" + self.roi + "/ptquery"
+        call = self.serverport + "/api/node/" + self.uuid + "/" + roi + "/ptquery"
         r = postdvid(call, self.username, data=pointlist)
         return r.json()
 
@@ -297,17 +310,19 @@ def main():
 
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--find-only", action="store_true", help="find tips only; do not place to do items")
+    parser.add_argument("--show-progress", action="store_true", help="show a progress bar while running")
 
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
-    parser.add_argument("--show-progress", action="store_true", help="show a progress bar while running")
+    parser.add_argument("--excluded-roi", help="specify an optional DVID RoI; to do items will not be placed in this RoI")
     parser.add_argument("--username", help="specify a username to assign the to do items to")
 
     args = parser.parse_args()
     if not args.serverport.startswith("http://"):
         args.serverport = "http://" + args.serverport
 
-    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username, args.roi)
-    detector.findandplace(args)
+    detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username,
+        args.roi, args.excluded_roi)
+    detector.findandplace(args.find_only, args.show_progress)
 
 
 # ------------------------- script starts here -------------------------

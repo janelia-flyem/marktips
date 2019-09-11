@@ -19,7 +19,9 @@ optional flags:
 
 --version prints the version and quits
 --find-only finds and returns the tip locations but does not place the to do items
---roi (RoI name) discards any found tips that are not in the input DVID RoI
+--roi (RoI name) discards any found tips that are not within the input DVID RoI
+--excluded-roi (RoI name) discards any found tips that are within the input DVID RoI
+    NOTE: Be careful if using both RoI options together!  It's possible to exclude all tips.
 --show-progress enables display of a progress bar while tips are detected (in stderr); as a side-effect, other warnings will also be shown
 --username (username) assigns the to do items to the input username rather than the user running the script
 ```
