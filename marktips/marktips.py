@@ -229,15 +229,77 @@ class TipDetector:
 
         t1 = time.time()
 
-        # retrieve existing to do items on the body and remove those locations
-        #   so we don't overwrite them
-        existinglocations = set(tuple(td["Pos"]) for td in self.gettodos())
-        annlist = [self.maketodo(loc) for loc in self.locations if tuple(loc) not in existinglocations]
+        # retrieve existing to do items on the body; if there is already a tip detection
+        #   to do at the location, skip it; if it's another kind of to do, slightly offset
+        #   the new tip detection to do so they coexist; keep in mind that the previous
+        #   tip detection to do may also be offset and still need to be skipped!
+        existingtodos = {tuple(td["Pos"]): td for td in self.gettodos()}
 
+        # two passes through candidate locations; first, check for existing to do at
+        #   the locations, and adjust locations as needed; then strip out Nones (meaning
+        #   already a tip detection to do at that location):
+        self.locations = [self.findvalidtodolocation(tuple(loc), existingtodos) for loc in self.locations]
+        self.locations = [loc for loc in self.locations if loc is not None]
+
+        annlist = [self.maketodo(loc) for loc in self.locations]
         self.postannotations(annlist)
 
         t2 = time.time()
         self.tplace = t2 - t1
+
+    def neighbors(self, location):
+        """
+        input: (x, y, z) location
+        output: list of (x, y, z) locations that are one unit away on the cardinal axes
+        """
+        x0, y0, z0 = location
+        return [
+            (x0 + 1, y0, z0),
+            (x0 - 1, y0, z0),
+            (x0, y0 + 1, z0),
+            (x0, y0 - 1, z0),
+            (x0, y0, z0 + 1),
+            (x0, y0, z0 - 1),
+        ]
+
+    def findvalidtodolocation(self, location, existingtodos):
+        """
+        find a valid location for a possible tip detection to do;
+        if there's already a tip detection to do there, return None;
+        if there's already some other kind of to do, perturb the
+        location slightly and return that, checking for more to do
+        along the way; raise exception if you can't find a spot close by
+
+        input: tuple (x, y, z) location of potential to do;
+            dictionary of (x, y, z) location: existing to do items
+        output: (x, y, z) location of valid to do location or None
+        """
+
+        # is there already a to do at that location?  if it's a tip
+        #   to do, return None (duplicate)
+        if location in existingtodos:
+            if self.istiptodo(existingtodos[location]):
+                return None
+            else:
+                # check surrounding locations
+                for loc in self.neighbors(location):
+                    if loc not in existingtodos:
+                        return loc
+                    elif self.istiptodo(existingtodos[loc]):
+                        return None
+                # if you get here, couldn't find a suitable location; that really
+                #   shouldn't happen, so let's make it an actual error:
+                errorquit("Could not place to do at location {}; all neighboring points occupied!".format(location))
+        else:
+            # nothing there, it's OK
+            return location
+
+    def istiptodo(self, todo):
+        # allow for the possibility that the to do doesn't have
+        #   all properties
+        prop = todo["Prop"]
+        return (prop.get("action", "") == "tip detector" or
+            "marktips.py" in prop.get("comment", ""))
 
     def maketodo(self, location):
         """

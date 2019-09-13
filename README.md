@@ -37,9 +37,11 @@ When the script is finished running, it will print a json object to the screen w
     "time": time stamp when output is written, in format '2019-09-09 10:38:32'
 
     # when successful, more data will be provided:
+
     "parameters": dictionary with run parameters; may include:
         "body ID": the ID of the body
         "RoI": the RoI where the to do items were placed
+        "excluded RoI": the RoI where to do items were not allowed to be placed
 
     "tfind": time in seconds taken to find tips
     "tplace": time in seconds to place to do items
@@ -48,8 +50,7 @@ When the script is finished running, it will print a json object to the screen w
     "locations": list of [x, y, z] locations of the tips in the RoI
     "nlocations": number of tips found
     "nlocationsRoI": number of tips found in the input RoI
-    "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations 
-        already had to do items, which were not replaced, or some locations were outside the given RoI
+    "nplaced": number of to do items placed; if nplaced < nlocations, it indicates that some locations already had to do items (which were not replaced), or some items were not placed due to RoI restrictions
     }
 ```
 
