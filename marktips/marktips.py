@@ -90,17 +90,17 @@ def addappuser(call, username):
 def getdefaultoutput():
     return {
         "version": __version__,
-        "username": getpass.getuser(),
-        "time": time.strftime(timeformat)
+        "parameters": {
+            "username": getpass.getuser(),
+            "time": time.strftime(timeformat),
+        },
     }
 
 
 def errorquit(message):
-    result = {
-        "status": False,
-        "message": message,
-    }
-    result.update(getdefaultoutput())
+    result = getdefaultoutput()
+    result["status"] =  False
+    result["message"] = message
     print(json.dumps(result))
     sys.exit(1)
 
@@ -120,7 +120,10 @@ class TipDetector:
             self.username = username
 
         # hold description of what was run
-        self.parameters = {}
+        self.parameters = {
+            "username": getpass.getuser(),
+            "time": time.strftime(timeformat)
+        }
 
         self.locations = []
         self.nlocations = 0
@@ -341,19 +344,17 @@ class TipDetector:
 
     def reportquit(self):
         message = f"{len(self.locations)} tips found in {self.tfind}s; {self.ntodosplaced} to do items placed in {self.tplace}s"
-        result = {
-            "status": True,
-            "message": message,
-            "parameters": self.parameters,
-            "tfind": self.tfind,
-            "tplace": self.tplace,
-            "ttotal": self.tfind + self.tplace,
-            "nlocations": self.nlocations,
-            "nlocationsRoI": self.nlocationsroi,
-            "nplaced": self.ntodosplaced,
-            "locations": self.locations,
-        }
-        result.update(getdefaultoutput())
+        result = getdefaultoutput()
+        result["parameters"].update(self.parameters)
+        result["status"] = True
+        result["message"] = message
+        result["tfind"] = self.tfind
+        result["tplace"] = self.tplace
+        result["ttotal"] = self.tfind + self.tplace
+        result["nlocations"] = self.nlocations
+        result["nlocationsRoI"] = self.nlocationsroi
+        result["nplaced"] = self.ntodosplaced
+        result["locations"] = self.locations
         print(json.dumps(result))
         sys.exit(0)
 
