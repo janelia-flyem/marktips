@@ -31,6 +31,7 @@ optional flags:
 --excluded-roi (RoI name) discards any found tips that are within the input DVID RoI
     NOTE: Be careful if using both RoI options together!  It's possible to exclude all tips.
 --show-progress enables display of a progress bar while tips are detected (in stderr); as a side-effect, other warnings will also be shown
+--save-parameters causes script run parameters to be added as a property on each to do item placed; the property contains a jsonstring of the "paraemters" dictionary described below
 --username (username) assigns the to do items to the input username rather than the user running the script
 ```
 

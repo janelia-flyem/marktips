@@ -149,16 +149,17 @@ class TipDetector:
         if self.excluded_roi is not None and not self.RoIexists(self.excluded_roi):
             errorquit("RoI {} does not exist".format(self.excluded_roi))
 
-    def findandplace(self, find_only, show_progress):
+    def findandplace(self, find_only, show_progress, save_parameters):
         """
         find tips and place to do items; report results by printing json; quit
 
-        input: flag for finding tips but not placing to do; flag for
-            showing progress bar on command line (in stderr)
+        input:  flag for finding tips but not placing to do;
+                flag for showing progress bar on command line (in stderr)
+                flag for storing run parameters on each to do
         """
         self.findtips(show_progress)
         if not find_only:
-            self.placetodos()
+            self.placetodos(save_parameters)
         self.reportquit()
 
     def findtips(self, showprogress):
@@ -244,9 +245,11 @@ class TipDetector:
         r = getdvid(call, self.username)
         return r.status_code == requests.codes.ok
 
-    def placetodos(self):
+    def placetodos(self, save_parameters):
         """
         posts a to do item at each previously found tip location
+
+        input: flag whether to store run parameters on each to do
         """
 
         if len(self.locations) == 0:
@@ -266,7 +269,7 @@ class TipDetector:
         self.locations = [self.findvalidtodolocation(tuple(loc), existingtodos) for loc in self.locations]
         self.locations = [loc for loc in self.locations if loc is not None]
 
-        annlist = [self.maketodo(loc) for loc in self.locations]
+        annlist = [self.maketodo(loc, save_parameters) for loc in self.locations]
         self.postannotations(annlist)
 
         t2 = time.time()
@@ -326,9 +329,9 @@ class TipDetector:
         return (prop.get("action", "") == "tip detector" or
             "marktips.py" in prop.get("comment", ""))
 
-    def maketodo(self, location):
+    def maketodo(self, location, save_parameters):
         """
-        input: [x, y, z] location
+        input: [x, y, z] location; flag whether to save run parameters on to do
         output: json for a to do annotation at that location
         """
         ann = {
@@ -340,6 +343,9 @@ class TipDetector:
         ann["Prop"]["user"] = self.username
         ann["Prop"]["checked"] = "0"
         ann["Prop"]["action"] = "tip detector"
+        if save_parameters:
+            # have to stringify the json or DVID will cry
+            ann["Prop"]["run parameters"] = json.dumps(self.parameters)
         ann["Tags"] = ["action:tip_detector"]
         return ann
 
@@ -396,6 +402,7 @@ def main():
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--find-only", action="store_true", help="find tips only; do not place to do items")
     parser.add_argument("--show-progress", action="store_true", help="show a progress bar while running")
+    parser.add_argument("--save-parameters", action="store_true", help="store run parameters in each to do placed")
 
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
     parser.add_argument("--excluded-roi", help="specify an optional DVID RoI; to do items will not be placed in this RoI")
@@ -407,7 +414,7 @@ def main():
 
     detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username,
         args.roi, args.excluded_roi)
-    detector.findandplace(args.find_only, args.show_progress)
+    detector.findandplace(args.find_only, args.show_progress, args.save_parameters)
 
 
 # ------------------------- script starts here -------------------------
