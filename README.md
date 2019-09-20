@@ -50,6 +50,7 @@ When the script is finished running, it will print a json object to the screen w
         "time": time stamp when script was started, in format '2019-09-09 10:38:32'
 
         # may include, when successful:
+        "todo-username": username that the to do items were assigned to
         "body ID": the ID of the body
         "RoI": the RoI where the to do items were placed
         "excluded RoI": the RoI where to do items were not allowed to be placed

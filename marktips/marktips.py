@@ -121,8 +121,10 @@ class TipDetector:
 
         # hold description of what was run
         self.parameters = {
+            # username = who is running this; todo-username = to whom the to do was assigned
             "username": getpass.getuser(),
-            "time": time.strftime(timeformat)
+            "todo-username": self.username,
+            "time": time.strftime(timeformat),
         }
 
         self.locations = []
@@ -131,6 +133,21 @@ class TipDetector:
         self.ntodosplaced = 0
         self.tplace = 0.0
         self.tfind = 0.0
+
+        self.validateinput()
+
+    def validateinput(self):
+        # check body ID exists?  not so easy yet; we don't have the segmentation
+        #   instance as input (we could), so we can't check; however,
+        #   it does get caught by the "body doesn't have skeleton" check,
+        #   which is true though a little misleading; for now, though,
+        #   it's an adequate message
+
+        # check RoIs exist
+        if self.roi is not None and not self.RoIexists(self.roi):
+            errorquit("RoI {} does not exist".format(self.roi))
+        if self.excluded_roi is not None and not self.RoIexists(self.excluded_roi):
+            errorquit("RoI {} does not exist".format(self.excluded_roi))
 
     def findandplace(self, find_only, show_progress):
         """
@@ -221,6 +238,11 @@ class TipDetector:
         call = self.serverport + "/api/node/" + self.uuid + "/" + roi + "/ptquery"
         r = postdvid(call, self.username, data=pointlist)
         return r.json()
+
+    def RoIexists(self, roi):
+        call = self.serverport + "/api/node/" + self.uuid + "/" + roi + "/info"
+        r = getdvid(call, self.username)
+        return r.status_code == requests.codes.ok
 
     def placetodos(self):
         """
