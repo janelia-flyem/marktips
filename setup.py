@@ -18,7 +18,8 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'marktips=marktips.marktips:main'
+            'marktips=marktips.marktips:main',
+            'marktipshistory=marktips.marktipshistory:main',
         ]
     },
     install_requires=requirements,
