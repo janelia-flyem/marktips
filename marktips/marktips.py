@@ -2,7 +2,10 @@
 
 marktips.py
 
-see README.md for usage
+this script runs a tip detection routine on a body and places to do
+items on the found tips
+
+see project wiki for usage
 
 
 """
@@ -218,7 +221,7 @@ class TipDetector:
         """
         retrieve to do items on the body of interest
         """
-        todocall = self.serverport + "/api/node/" + self.uuid + "/" + todoinstancename + "/label/" + self.bodyid
+        todocall = self.serverport + "/api/node/" + self.uuid + "/" + self.todoinstance + "/label/" + self.bodyid
         r = getdvid(todocall, self.username)
         if r.status_code != requests.codes.ok:
             # bail out; later I'd prefer to have the error percolate up and be
