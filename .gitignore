@@ -73,3 +73,6 @@ junit.xml
 
 # PyCharm
 .idea/
+
+# Mac
+.DS_Store
