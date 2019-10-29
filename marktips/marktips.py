@@ -17,6 +17,7 @@ from contextlib import contextmanager, redirect_stdout, redirect_stderr
 import getpass
 from io import StringIO
 import json
+import random
 import sys
 import time
 
@@ -110,11 +111,12 @@ def errorquit(message):
 
 class TipDetector:
     def __init__(self, serverport, uuid, bodyid, todoinstance, username=None,
-        roi=None, excluded_roi=None):
+        indexing="none", roi=None, excluded_roi=None):
         self.serverport = serverport
         self.uuid = uuid
         self.bodyid = bodyid
         self.todoinstance = todoinstance
+        self.indexing = indexing
         self.roi = roi
         self.excluded_roi = excluded_roi
         if username is None:
@@ -272,7 +274,9 @@ class TipDetector:
         self.locations = [self.findvalidtodolocation(tuple(loc), existingtodos) for loc in self.locations]
         self.locations = [loc for loc in self.locations if loc is not None]
 
+        self.parameters["indexing"] = self.indexing
         annlist = [self.maketodo(loc, save_parameters) for loc in self.locations]
+        annlist = self.addindexing(self.indexing, annlist)
         self.postannotations(annlist)
 
         t2 = time.time()
@@ -352,6 +356,28 @@ class TipDetector:
         ann["Tags"] = ["action:tip_detector"]
         return ann
 
+    def addindexing(self, kind, todolist):
+        """
+        add a index as a property on each to do item so they can be
+        ordered in NeuTu by some criterion
+
+        input: kind = "none", "random"; list of to do items
+        output: list of to do items (same order) with indices added
+        """
+
+        # no indexing:
+        if kind == "none":
+            return todolist
+        elif kind == "random":
+            tipindices = list(range(len(todolist)))
+            random.shuffle(tipindices)
+            for index, todo in zip(tipindices, todolist):
+                todo["Prop"]["tip qc index"] = str(index)
+            return todolist
+        else:
+            # should never happen
+            raise ValueError("unknown indexing kind = {}".format(self.indexing))
+
     def postannotations(self, annlist):
         """
         posts the list of annotations to dvid
@@ -409,6 +435,8 @@ def main():
 
     parser.add_argument("--roi", help="specify an optional DVID RoI; to do items will only be placed in this RoI")
     parser.add_argument("--excluded-roi", help="specify an optional DVID RoI; to do items will not be placed in this RoI")
+    parser.add_argument("--indexing", choices=["none", "random"], default="random",
+        help="add indices to to do items")
     parser.add_argument("--username", help="specify a username to assign the to do items to")
 
     args = parser.parse_args()
@@ -416,7 +444,7 @@ def main():
         args.serverport = "http://" + args.serverport
 
     detector = TipDetector(args.serverport, args.uuid, args.bodyid, args.todoinstance, args.username,
-        args.roi, args.excluded_roi)
+        args.indexing, args.roi, args.excluded_roi)
     detector.findandplace(args.find_only, args.show_progress, args.save_parameters)
 
 
